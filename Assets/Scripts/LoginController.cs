@@ -22,18 +22,19 @@ public class LoginController : MonoBehaviourPunCallbacks
     // マッチングが成功した時に呼ばれるコールバック
     public override void OnJoinedRoom()
     {
+
         //MasterClientにGameControllerの生成
         if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
         {
-            //PhotonNetwork.Instantiate("Player1", new Vector3(0, 0, 0), Quaternion.identity);
-            PhotonNetwork.Instantiate("Cube", new Vector3(0, 0, 0), Quaternion.identity);
-        }
-
-        else if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
-        {
-            StartCoroutine(GameControllerGenerate());
+            PhotonNetwork.Instantiate("GameController", new Vector3(0, 0, 0), Quaternion.identity);
 
         }
+
+        //else if (PhotonNetwork.LocalPlayer.ActorNumber == 2)
+        //{
+        //    StartCoroutine(GameControllerGenerate());
+
+        //}
 
         //if (PhotonNetwork.LocalPlayer.ActorNumber == 1)
         //{
