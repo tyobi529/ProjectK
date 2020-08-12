@@ -40,6 +40,14 @@ MonoBehaviour:
   - RespawnSpaceship
   - TurnEnd
   - ReinforceStatus
+  - Send_2Inf
+  - SendTurnend
+  - TextUpdate
+  - Damage
+  - NextPhase
+  - ShowButton
+  - ChangePhase
+  - SendSelect
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

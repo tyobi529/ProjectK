@@ -22,15 +22,33 @@ public class TextController : MonoBehaviour
         
     //}
 
-    public void TextUpdate(int[] hp, int[] power, int[] magic)
+    public void TextUpdate(int id, int[] hp, int[] power, int[] magic)
     {
-        for (int i = 0; i < 2; i++)
+        if (id == 1)
         {
-            HPText[i].text = hp[i].ToString();
-            PWText[i].text = power[i].ToString();
-            MGText[i].text = magic[i].ToString();
+
+            HPText[0].text = hp[0].ToString();
+            PWText[0].text = power[0].ToString();
+            MGText[0].text = magic[0].ToString();
+
+            HPText[1].text = hp[1].ToString();
+            PWText[1].text = power[1].ToString();
+            MGText[1].text = magic[1].ToString();
+
 
         }
+
+        if (id == 2)
+        {
+            HPText[0].text = hp[1].ToString();
+            PWText[0].text = power[1].ToString();
+            MGText[0].text = magic[1].ToString();
+
+            HPText[1].text = hp[0].ToString();
+            PWText[1].text = power[0].ToString();
+            MGText[1].text = magic[0].ToString();
+        }
+
 
     }
 }

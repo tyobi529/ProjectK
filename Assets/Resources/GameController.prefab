@@ -48,7 +48,6 @@ MonoBehaviour:
   power: 6400000064000000
   magic: 6400000064000000
   id: 0
-  attack_id: 0
 --- !u!114 &4208703740334158929
 MonoBehaviour:
   m_ObjectHideFlags: 0
