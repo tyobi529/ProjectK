@@ -1,11 +1,16 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviourPunCallbacks
 {
-    CardController cardcontroller;
+    CardGenerator cardgenerator;
+
+    List<int> selectedcard = new List<int>();
+
+    GameObject DecisionButton;
 
 
     public int[] hp = new int[2];
@@ -30,9 +35,9 @@ public class GameController : MonoBehaviourPunCallbacks
     public int id;
 
     //常に表示
-    private GameObject PowerButton;
-    private GameObject MagicButton;
-    private GameObject SupportButton;
+    //private GameObject PowerButton;
+    //private GameObject MagicButton;
+    //private GameObject SupportButton;
 
 
     private GameObject[] PowerAction = new GameObject[3];
@@ -52,7 +57,7 @@ public class GameController : MonoBehaviourPunCallbacks
 
     //１：育成
     //２：攻防
-    int phase = 1;
+    int phase;
 
 
     Methods methods;
@@ -63,11 +68,20 @@ public class GameController : MonoBehaviourPunCallbacks
     {
         id = PhotonNetwork.LocalPlayer.ActorNumber;
 
-        cardcontroller = GameObject.Find("CardController").GetComponent<CardController>();
-
-        cardcontroller.CardGenerate();
+        cardgenerator = GameObject.Find("CardGenerator").GetComponent<CardGenerator>();
 
 
+        DecisionButton = GameObject.Find("DecisionButton");
+
+        DecisionButton.GetComponent<Button>().onClick.AddListener(OnDecisionButton);
+        DecisionButton.SetActive(false);
+
+
+        //ゲームスタート
+        //カード表示
+        phase = 1;
+        cardgenerator.CardGenerate();
+        cardgenerator.cardcount = 0;
 
         //テキスト表示オブジェクト
         //TextController = GameObject.Find("TextController");
@@ -111,10 +125,18 @@ public class GameController : MonoBehaviourPunCallbacks
     private void Update()
     {
 
-        if (phase == 1)
+        if (phase == 2)
         {
             //カードの配置
             //ボタンの表示
+
+            foreach(var a in selectedcard)
+            {
+                Debug.Log(a);
+
+            }
+
+            phase = 1;
         }
 
 
@@ -122,6 +144,50 @@ public class GameController : MonoBehaviourPunCallbacks
 
     }
 
+
+    public void OnDecisionButton()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (cardgenerator.GeneratedCard[i].GetComponent<CardController>().isselect)
+            {
+                if (cardgenerator.GeneratedCard[i].tag == "HP")
+                {
+                    selectedcard.Add(0);
+                }
+
+                if (cardgenerator.GeneratedCard[i].tag == "PW")
+                {
+                    selectedcard.Add(1);
+                }
+
+                if (cardgenerator.GeneratedCard[i].tag == "MG")
+                {
+                    selectedcard.Add(2);
+                }
+
+            }
+
+            Destroy(cardgenerator.GeneratedCard[i]);
+        }
+
+        //foreach (var a in selectedcard)
+        //{
+        //    Debug.Log(a);
+        //}
+
+        //gamecontroller.selectedcard = selectedcard;
+
+
+        selectedcard.Clear();
+        phase = 2;
+
+
+    }
+
+
+    //[PunRPC]
+    //private void Reinforce
 
 
 

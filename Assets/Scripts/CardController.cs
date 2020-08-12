@@ -1,32 +1,56 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardController : MonoBehaviour
 {
 
-    //GameController gamecontroller;
+    CardGenerator cardgenerator;
 
-    //public int[] card_num = new int[5];
+    //Button DecisionButton;
 
-    public GameObject[] CardPrefab = new GameObject[3];
+    public bool isselect = false;
 
+    //public bool cardnum = 0;
 
-
-    //カードをランダムに５枚生成する
-    public void CardGenerate()
+    //// Start is called before the first frame update
+    void Start()
     {
-        for (int i = 0; i < 5; i++)
-        {
-            //０：HP
-            //１：物理
-            //２：魔法
-            int value = Random.Range(0, 2);
-
-            //card_num[i] = value;
-
-            GameObject card = Instantiate(CardPrefab[value]) as GameObject;
-            card.transform.position = new Vector3(-2.2f + 1.1f * i, -3f, 0f);
-        }
+        cardgenerator = GameObject.Find("CardGenerator").GetComponent<CardGenerator>();
     }
+
+    //// Update is called once per frame
+    //void Update()
+    //{
+
+    //}
+
+    void OnMouseDown()
+    {
+        //Debug.Log("OnMouseDown");
+
+        //すでに選択されていたらキャンセル
+        if (isselect)
+        {
+            cardgenerator.cardcount--;
+            this.transform.Translate(0f, -0.5f, 0f);
+            isselect = false;
+        }
+        //カード選択
+        else
+        {
+            if (cardgenerator.cardcount < 3)
+            {
+                this.transform.Translate(0f, 0.5f, 0f);
+                cardgenerator.cardcount++;
+
+                isselect = true;
+            }
+        }
+
+    }
+
+    
+
 }
