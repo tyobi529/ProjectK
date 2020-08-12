@@ -44,12 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f240abb9e1949feac2755b3bb365af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0000000000000000
-  power: 0000000000000000
-  magic: 0000000000000000
+  hp: f4010000f4010000
+  power: 6400000064000000
+  magic: 6400000064000000
   id: 0
   attack_id: 0
-  phase: 1
 --- !u!114 &4208703740334158929
 MonoBehaviour:
   m_ObjectHideFlags: 0

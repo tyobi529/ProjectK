@@ -10,17 +10,14 @@ public class GameController : MonoBehaviourPunCallbacks
 
     List<int> selectedcard = new List<int>();
 
+    //int[] selected = new int[3];
+
     GameObject DecisionButton;
 
 
-    public int[] hp = new int[2];
-    public int[] power = new int[2];
-    public int[] magic = new int[2];
-
-
-
-
-   
+    public int[] hp = new int[2] { 500, 500 };
+    public int[] power = new int[2] { 100, 100 };
+    public int[] magic = new int[2] { 100, 100 };
 
 
 
@@ -62,7 +59,8 @@ public class GameController : MonoBehaviourPunCallbacks
 
     Methods methods;
 
-    private GameObject TextController;
+    //テキスト更新用
+    private TextController textcontroller;
 
     private void Start()
     {
@@ -75,6 +73,10 @@ public class GameController : MonoBehaviourPunCallbacks
 
         DecisionButton.GetComponent<Button>().onClick.AddListener(OnDecisionButton);
         DecisionButton.SetActive(false);
+
+
+        textcontroller = GameObject.Find("TextController").GetComponent<TextController>();
+
 
 
         //ゲームスタート
@@ -149,8 +151,11 @@ public class GameController : MonoBehaviourPunCallbacks
     {
         for (int i = 0; i < 5; i++)
         {
+
             if (cardgenerator.GeneratedCard[i].GetComponent<CardController>().isselect)
             {
+                Debug.Log(i);
+
                 if (cardgenerator.GeneratedCard[i].tag == "HP")
                 {
                     selectedcard.Add(0);
@@ -171,23 +176,49 @@ public class GameController : MonoBehaviourPunCallbacks
             Destroy(cardgenerator.GeneratedCard[i]);
         }
 
-        //foreach (var a in selectedcard)
-        //{
-        //    Debug.Log(a);
-        //}
 
-        //gamecontroller.selectedcard = selectedcard;
 
+
+        //ステータスアップ
+        photonView.RPC(nameof(ReinforceStatus), RpcTarget.All, id);
 
         selectedcard.Clear();
+
+
+
+
+        textcontroller.TextUpdate(hp, power, magic);
+
         phase = 2;
 
 
     }
 
 
-    //[PunRPC]
-    //private void Reinforce
+    [PunRPC]
+    private void ReinforceStatus(int id)
+    {
+
+        for (int i = 0; i < 3; i++)
+        {
+
+            if (selectedcard[i] == 0)
+            {
+                hp[id - 1] += 50;
+            }
+
+            if (selectedcard[i] == 1)
+            {
+                power[id - 1] += 20;
+            }
+
+            if (selectedcard[i] == 2)
+            {
+                magic[id - 1] += 20;
+            }
+        }
+        
+    }
 
 
 
