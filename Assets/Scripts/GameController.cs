@@ -97,17 +97,13 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
         textcontroller = GameObject.Find("TextController").GetComponent<TextController>();
 
 
-        
 
+        phase = 1;
 
         //ゲームスタート
-        //カード表示
-        phase = 1;
-        cardgenerator.CardGenerate();
-        cardgenerator.cardcount = 0;
+        StartPhase1();
 
 
-        //attack_id = 2;
 
     }
 
@@ -149,22 +145,42 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                 //攻防フェーズ
                 else if (phase == 2)
                 {
-                    //Debug.Log("bbb");
 
                     //予測が外れる
+                    //攻撃成功
                     if (select[0] != select[1])
                     {
                         photonView.RPC(nameof(Damage), RpcTarget.All, attack_id, select[attack_id - 1]);
 
-                        //turnendをfalseに
-                        photonView.RPC(nameof(SendTurnend), RpcTarget.All, 1);
-                        photonView.RPC(nameof(SendTurnend), RpcTarget.All, 2);
 
-                        //テキスト更新
-                        photonView.RPC(nameof(TextUpdate), RpcTarget.All);
+                    }
 
-                        isattack[attack_id - 1] = true;
+                    //turnendをfalseに
+                    photonView.RPC(nameof(SendTurnend), RpcTarget.All, 1);
+                    photonView.RPC(nameof(SendTurnend), RpcTarget.All, 2);
 
+                    //テキスト更新
+                    photonView.RPC(nameof(TextUpdate), RpcTarget.All);
+
+                    //攻撃済にする
+                    isattack[attack_id - 1] = true;
+
+
+                    if (isattack[0] && isattack[1])
+                    {
+                        //次のターンへの準備
+                        photonView.RPC(nameof(ChangePhase), RpcTarget.All);
+                        isattack[0] = false;
+                        isattack[1] = false;
+
+
+                        //フェーズ１の開始
+                        photonView.RPC(nameof(StartPhase1), RpcTarget.All);
+
+                    }
+                    //攻守交代
+                    else
+                    {
                         if (attack_id == 1)
                         {
                             attack_id = 2;
@@ -174,18 +190,13 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                             attack_id = 1;
                         }
 
+                        photonView.RPC(nameof(ShowButton), RpcTarget.All);
                     }
                 }
 
             }
 
-            if (isattack[0] && isattack[1])
-            {
-                //次のターンへの準備
-                photonView.RPC(nameof(ChangePhase), RpcTarget.All);
-                isattack[0] = false;
-                isattack[1] = false;
-            }
+
         }
 
 
@@ -209,50 +220,54 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void OnDecisionButton()
     {
-        int j = 0;
-
-        for (int i = 0; i < 5; i++)
+        if (phase == 1)
         {
+            int j = 0;
 
-            if (cardgenerator.GeneratedCard[i].GetComponent<CardController>().isselect)
+            for (int i = 0; i < 5; i++)
             {
-                //Debug.Log(i);
 
-                if (cardgenerator.GeneratedCard[i].tag == "HP")
+                if (cardgenerator.GeneratedCard[i].GetComponent<CardController>().isselect)
                 {
-                    //selectedcard.Add(0);
-                    selectedcard[j] = 0;
-                    j++;
+                    //Debug.Log(i);
+
+                    if (cardgenerator.GeneratedCard[i].tag == "HP")
+                    {
+                        //selectedcard.Add(0);
+                        selectedcard[j] = 0;
+                        j++;
+                    }
+
+                    if (cardgenerator.GeneratedCard[i].tag == "PW")
+                    {
+                        //selectedcard.Add(1);
+                        selectedcard[j] = 1;
+                        j++;
+                    }
+
+                    if (cardgenerator.GeneratedCard[i].tag == "MG")
+                    {
+                        //selectedcard.Add(2);
+                        selectedcard[j] = 2;
+                        j++;
+                    }
+
                 }
 
-                if (cardgenerator.GeneratedCard[i].tag == "PW")
-                {
-                    //selectedcard.Add(1);
-                    selectedcard[j] = 1;
-                    j++;
-                }
-
-                if (cardgenerator.GeneratedCard[i].tag == "MG")
-                {
-                    //selectedcard.Add(2);
-                    selectedcard[j] = 2;
-                    j++;
-                }
+                Destroy(cardgenerator.GeneratedCard[i]);
 
             }
 
-            Destroy(cardgenerator.GeneratedCard[i]);
+            photonView.RPC(nameof(ReinforceStatus), RpcTarget.All, id, selectedcard);
 
-            DecisionButton.SetActive(false);
+
+            //DecisionButton.SetActive(false);
         }
 
-        photonView.RPC(nameof(ReinforceStatus), RpcTarget.All, id, selectedcard);
-
-
-
+        //ターンエンドを伝える
         photonView.RPC(nameof(SendTurnend), RpcTarget.All, id);
 
-
+        HideButton();
     }
 
     //ボタンのオンオフ
@@ -261,33 +276,43 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     {
         PowerButton.SetActive(true);
         MagicButton.SetActive(true);
+        DecisionButton.SetActive(true);
+
+        PowerButton.GetComponent<Image>().color = Color.white;
+        MagicButton.GetComponent<Image>().color = Color.white;
+        DecisionButton.GetComponent<Image>().color = Color.white;
+
     }
 
+    [PunRPC]
+    private void HideButton()
+    {
+        PowerButton.SetActive(false);
+        MagicButton.SetActive(false);
+        DecisionButton.SetActive(false);
+
+        PowerButton.GetComponent<Image>().color = Color.white;
+        MagicButton.GetComponent<Image>().color = Color.white;
+        DecisionButton.GetComponent<Image>().color = Color.white;
+
+
+    }
 
     public void OnPowerButton()
     {
-        //select[id - 1] = 1;
-
         photonView.RPC(nameof(SendSelect), RpcTarget.All, id, 1);
 
-
-        Debug.Log(select[1]);
-
         PowerButton.GetComponent<Image>().color = Color.yellow;
-
-        photonView.RPC(nameof(SendTurnend), RpcTarget.All, id);
 
     }
 
     public void OnMagicButton()
     {
-        //select[id - 1] = 2;
 
         photonView.RPC(nameof(SendSelect), RpcTarget.All, id, 2);
 
         MagicButton.GetComponent<Image>().color = Color.yellow;
 
-        photonView.RPC(nameof(SendTurnend), RpcTarget.All, id);
 
     }
 
@@ -343,6 +368,20 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
 
     }
 
+    //育成フェーズを始める
+    [PunRPC]
+    private void StartPhase1()
+    {
+        //カード表示
+        cardgenerator.CardGenerate();
+        cardgenerator.cardcount = 0;
+
+        //決定ボタン表示
+        DecisionButton.SetActive(true);
+    }
+
+
+
     //攻防フェーズへ
     [PunRPC]
     private void ChangePhase()
@@ -386,49 +425,30 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     //ダメージ関数
-    //プレイヤー１が攻撃
     [PunRPC]
     private void Damage(int id, int select)
     {
-        //Debug.Log("aaa");
+        int damage = 0;
+
+        if (select == 1)
+        {
+            damage = power[id - 1];
+        }
+        else if (select == 2)
+        {
+            damage = magic[id - 1];
+        }
+        else if (select == 3)
+        {
+            damage = power[id - 1] + magic[id - 1];
+        }
 
         if (id == 1)
-        {
-            if (select == 1)
-            {
-                hp[1] -= power[0];
-            }
-            else if (select == 2)
-            {
-                hp[1] -= magic[0];
-            }
-            else if (select == 3)
-            {
-                hp[1] -= (power[0] + magic[0]);
-            }
-        }
+            hp[1] -= damage;
         else if (id == 2)
-        {
-            Debug.Log(select);
-            if (select == 1)
-            {
-                Debug.Log("ddd");
+            hp[0] -= damage;
 
-                hp[0] -= power[1];
-            }
-            else if (select == 2)
-            {
-                Debug.Log("ccc");
-
-                hp[0] -= magic[1];
-            }
-            else if (select == 3)
-            {
-                hp[0] -= (power[1] + magic[1]);
-            }
-        }
-
-        
+        Debug.Log("プレイヤー" + (id - 1) + "に" + damage + "のダメージを与えた");
     }
 
 
