@@ -11,7 +11,7 @@ public class CardGenerator : MonoBehaviour
 
     //public int[] card_num = new int[5];
 
-    public GameObject[] CardPrefab = new GameObject[3];
+    public GameObject[] CardPrefab = new GameObject[5];
 
     public GameObject[] GeneratedCard = new GameObject[5];
 
@@ -55,10 +55,18 @@ public class CardGenerator : MonoBehaviour
     {
         for (int i = 0; i < 5; i++)
         {
-            //０：HP
-            //１：物理
-            //２：魔法
-            int value = Random.Range(0, 3);
+            //０：物理
+            //１：魔法
+            //２：HP
+            //３：火炎斬り
+            //４：メラ
+
+            int value = 0;
+
+            if (i < 3)
+                value = Random.Range(0, 2);
+            else
+                value = Random.Range(0, 5);
 
             //card_num[i] = value;
 

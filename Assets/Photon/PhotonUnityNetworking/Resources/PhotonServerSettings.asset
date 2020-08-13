@@ -50,6 +50,9 @@ MonoBehaviour:
   - SendSelect
   - StartPhase1
   - HideButton
+  - Sendisselect
+  - StartPhase2
+  - Login2Player
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

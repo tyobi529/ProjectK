@@ -20,6 +20,7 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     public int[] hp = new int[2] { 500, 500 };
     public int[] power = new int[2] { 100, 100 };
     public int[] magic = new int[2] { 100, 100 };
+    List<int>[] special = new List<int>[2];
 
     //選択した時にtrue
     bool[] turnend = new bool[2] { false, false };
@@ -34,19 +35,14 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     int[] select = new int[2] {0, 0};
 
 
+    //必殺カウント
+    int[] deathcount = new int[2] { 0, 0 };
+
+
 
 
     public int id;
 
-    //常に表示
-    //private GameObject PowerButton;
-    //private GameObject MagicButton;
-    //private GameObject SupportButton;
-
-
-    private GameObject[] PowerAction = new GameObject[3];
-    private GameObject[] MagicAction = new GameObject[3];
-    private GameObject[] SupportAction = new GameObject[3];
 
 
 
@@ -63,6 +59,17 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     //２：攻防
     int phase;
 
+    //フェーズ終了時にtrue
+    bool endphase1 = false;
+    bool endphase2 = false;
+
+    //フェーズ開始時にtrue
+    bool startphase1 = false;
+    bool startphase2 = false;
+
+    //trueでゲームスタート
+    bool gamestart = false;
+
 
     Methods methods;
 
@@ -72,6 +79,8 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     GameObject PowerButton;
     GameObject MagicButton;
     GameObject DeadlyButton;
+
+    GameObject Phase2Text;
 
     private void Start()
     {
@@ -83,26 +92,38 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
         DecisionButton = GameObject.Find("DecisionButton");
         PowerButton = GameObject.Find("PowerButton");
         MagicButton = GameObject.Find("MagicButton");
+        DeadlyButton = GameObject.Find("DeadlyButton");
+
 
         DecisionButton.GetComponent<Button>().onClick.AddListener(OnDecisionButton);
         PowerButton.GetComponent<Button>().onClick.AddListener(OnPowerButton);
         MagicButton.GetComponent<Button>().onClick.AddListener(OnMagicButton);
+        DeadlyButton.GetComponent<Button>().onClick.AddListener(OnDeadlyButton);
+
 
         DecisionButton.SetActive(false);
         PowerButton.SetActive(false);
         MagicButton.SetActive(false);
+        DeadlyButton.SetActive(false);
+
 
 
 
         textcontroller = GameObject.Find("TextController").GetComponent<TextController>();
 
+        Phase2Text = GameObject.Find("Phase2Text");
+        Phase2Text.SetActive(false);
 
 
         phase = 1;
 
-        //ゲームスタート
-        StartPhase1();
 
+        if (id == 2)
+        {
+            //プレイヤー１に参加を伝える
+            photonView.RPC(nameof(Login2Player), RpcTarget.All);
+
+        }
 
 
     }
@@ -110,9 +131,54 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        //GameController生成側から実行する
-        if (photonView.IsMine)
+
+
+        //プレイヤー１から実行する
+        if (photonView.IsMine && gamestart)
         {
+
+            if (phase == 1 && !startphase1)
+            {
+                //フェーズ１の開始
+                photonView.RPC(nameof(StartPhase1), RpcTarget.All);
+                startphase1 = true;
+            }
+
+            else if (phase == 1 && endphase1)
+            {
+                phase = 2;
+            }
+
+            else if (phase == 2 && !startphase2)
+            {
+                //フェーズ２の開始
+
+                //先行、後攻決定
+                attack_id = Random.Range(1, 3);
+
+                //フェーズ２の開始
+                photonView.RPC(nameof(StartPhase2), RpcTarget.All, attack_id);
+
+                startphase2 = true;
+            }
+
+            else if (phase == 2 && endphase2)
+            {
+                phase = 1;
+
+                //次のターンへ
+                startphase1 = false;
+                startphase2 = false;
+                endphase1 = false;
+                endphase2 = false;
+
+
+                Phase2Text.SetActive(false);
+
+                turncount++;
+            }
+
+
             //どちらも選択終了
             if (turnend[0] && turnend[1])
             {
@@ -122,22 +188,12 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                     //テキスト更新
                     photonView.RPC(nameof(TextUpdate), RpcTarget.All);
 
-                    //先行、後攻決定
-                    attack_id = Random.Range(1, 3);
-                    //attack_id = 2;
-
-                    Debug.Log("player" + attack_id + "の攻撃");
 
                     //turnendをfalseに
                     photonView.RPC(nameof(SendTurnend), RpcTarget.All, 1);
                     photonView.RPC(nameof(SendTurnend), RpcTarget.All, 2);
 
-
-                    //ボタン表示
-                    photonView.RPC(nameof(ShowButton), RpcTarget.All);
-
-                    //次フェーズへ
-                    photonView.RPC(nameof(ChangePhase), RpcTarget.All);
+                    endphase1 = true;
 
                 }
 
@@ -169,13 +225,10 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                     if (isattack[0] && isattack[1])
                     {
                         //次のターンへの準備
-                        photonView.RPC(nameof(ChangePhase), RpcTarget.All);
                         isattack[0] = false;
                         isattack[1] = false;
 
-
-                        //フェーズ１の開始
-                        photonView.RPC(nameof(StartPhase1), RpcTarget.All);
+                        endphase2 = true;
 
                     }
                     //攻守交代
@@ -190,7 +243,8 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                             attack_id = 1;
                         }
 
-                        photonView.RPC(nameof(ShowButton), RpcTarget.All);
+                        //攻守交代してもう一度フェーズ２
+                        photonView.RPC(nameof(StartPhase2), RpcTarget.All, attack_id);
                     }
                 }
 
@@ -214,6 +268,13 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
 
 
 
+
+    }
+
+    [PunRPC]
+    private void Login2Player()
+    {
+        gamestart = true;
 
     }
 
@@ -249,6 +310,20 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                     {
                         //selectedcard.Add(2);
                         selectedcard[j] = 2;
+                        j++;
+                    }
+
+                    if (cardgenerator.GeneratedCard[i].tag == "special1")
+                    {
+                        //selectedcard.Add(2);
+                        selectedcard[j] = 3;
+                        j++;
+                    }
+
+                    if (cardgenerator.GeneratedCard[i].tag == "special2")
+                    {
+                        //selectedcard.Add(2);
+                        selectedcard[j] = 4;
                         j++;
                     }
 
@@ -316,6 +391,11 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
 
     }
 
+    public void OnDeadlyButton()
+    {
+
+    }
+
     //ターン終了情報更新
     [PunRPC]
     private void SendTurnend(int id)
@@ -356,6 +436,18 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
             {
                 magic[id - 1] += 20;
             }
+
+            //火炎斬り
+            if (card[i] == 3)
+            {
+                special[id - 1].Add(1);
+            }
+
+            //メラ
+            if (card[i] == 4)
+            {
+                special[id - 1].Add(2);
+            }
         }
 
         //Debug.Log("cc");
@@ -372,6 +464,9 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     private void StartPhase1()
     {
+        Debug.Log("ターン：　" + turncount);
+
+        //Debug.Log("")
         //カード表示
         cardgenerator.CardGenerate();
         cardgenerator.cardcount = 0;
@@ -380,21 +475,45 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
         DecisionButton.SetActive(true);
     }
 
+    //攻防フェーズを始める
+    [PunRPC]
+    private void StartPhase2(int attack)
+    {
+        //ボタン表示
+        ShowButton();
+
+        textcontroller.Phase2Update(id, attack);
+
+        Phase2Text.SetActive(true);
+
+
+        if (deathcount[attack - 1] >= 3)
+            DeadlyButton.SetActive(true);
+
+        //特技
+        //攻撃ターン
+        if (attack == id)
+        {
+
+        }
+
+    }
+
 
 
     //攻防フェーズへ
-    [PunRPC]
-    private void ChangePhase()
-    {
-        if (phase == 1)
-        {
-            phase = 2;
-        }
-        else if (phase == 2)
-        {
-            phase = 1;
-        }
-    }
+    //[PunRPC]
+    //private void ChangePhase()
+    //{
+    //    if (phase == 1)
+    //    {
+    //        phase = 2;
+    //    }
+    //    else if (phase == 2)
+    //    {
+    //        phase = 1;
+    //    }
+    //}
 
     //選択を共有
     [PunRPC]
@@ -443,12 +562,26 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
             damage = power[id - 1] + magic[id - 1];
         }
 
-        if (id == 1)
-            hp[1] -= damage;
-        else if (id == 2)
-            hp[0] -= damage;
+        //乱数
+        damage = damage * Random.Range(8, 13) / 10;
 
-        Debug.Log("プレイヤー" + (id - 1) + "に" + damage + "のダメージを与えた");
+        if (id == 1)
+        {
+            hp[1] -= damage;
+            deathcount[1]++;
+            Debug.Log("プレイヤー２に" + damage + "のダメージを与えた");
+
+
+        }
+        else if (id == 2)
+        {
+            hp[0] -= damage;
+            deathcount[1]++;
+            Debug.Log("プレイヤー１に" + damage + "のダメージを与えた");
+
+
+        }
+
     }
 
 
@@ -458,10 +591,21 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
         if (stream.IsWriting)
         {
             stream.SendNext(attack_id);
+            stream.SendNext(turncount);
+
+            stream.SendNext(phase);
+
+
+
         }
         else
         {
             attack_id = (int)stream.ReceiveNext();
+            turncount = (int)stream.ReceiveNext();
+
+            phase = (int)stream.ReceiveNext();
+
+
         }
     }
 

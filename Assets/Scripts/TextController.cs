@@ -9,6 +9,8 @@ public class TextController : MonoBehaviour
     public Text[] PWText = new Text[2];
     public Text[] MGText = new Text[2];
 
+    public Text phase2Text;
+
 
     // Start is called before the first frame update
     void Start()
@@ -50,6 +52,18 @@ public class TextController : MonoBehaviour
         }
 
 
+    }
+
+    public void Phase2Update(int id, int attack_id)
+    {
+        if (id == attack_id)
+        {
+            phase2Text.text = "攻撃ターンです。";
+        }
+        else
+        {
+            phase2Text.text = "防御ターンです。";
+        }
     }
 }
 

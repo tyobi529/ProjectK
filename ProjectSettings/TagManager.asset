@@ -7,6 +7,8 @@ TagManager:
   - HP
   - PW
   - MG
+  - special1
+  - special2
   layers:
   - Default
   - TransparentFX
