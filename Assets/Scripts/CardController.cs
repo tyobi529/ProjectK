@@ -12,7 +12,17 @@ public class CardController : MonoBehaviour
 
     public bool isselect = false;
 
-    //public bool cardnum = 0;
+    public int power = 0;
+    public int magic = 0;
+    public int defence = 0;
+    public int speed = 0;
+
+    public int cost = 0;
+
+    public int special = 0;
+
+    public int skill = 0;
+
 
     //// Start is called before the first frame update
     void Start()
@@ -20,21 +30,17 @@ public class CardController : MonoBehaviour
         cardgenerator = GameObject.Find("CardGenerator").GetComponent<CardGenerator>();
     }
 
-    //// Update is called once per frame
-    //void Update()
-    //{
 
-    //}
 
-    void OnMouseDown()
+    public void OnCard()
     {
-        //Debug.Log("OnMouseDown");
+        //Debug.Log("OnCard");
 
         //すでに選択されていたらキャンセル
         if (isselect)
         {
             cardgenerator.cardcount--;
-            this.transform.Translate(0f, -0.5f, 0f);
+            this.transform.Translate(0f, -100f, 0f);
             isselect = false;
         }
         //カード選択
@@ -42,7 +48,7 @@ public class CardController : MonoBehaviour
         {
             if (cardgenerator.cardcount < 3)
             {
-                this.transform.Translate(0f, 0.5f, 0f);
+                this.transform.Translate(0f, 100f, 0f);
                 cardgenerator.cardcount++;
 
                 isselect = true;
@@ -51,6 +57,6 @@ public class CardController : MonoBehaviour
 
     }
 
-    
+
 
 }

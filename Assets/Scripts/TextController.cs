@@ -5,9 +5,18 @@ using UnityEngine.UI;
 
 public class TextController : MonoBehaviour
 {
+    //public Text[] HPText = new Text[2];
+    //public Text[] PWText = new Text[2];
+    //public Text[] MGText = new Text[2];
+
     public Text[] HPText = new Text[2];
-    public Text[] PWText = new Text[2];
-    public Text[] MGText = new Text[2];
+    public Text[] MPText = new Text[2];
+    public Text[] AttackText = new Text[2];
+    public Text[] DefenceText = new Text[2];
+    public Text[] SpeedText = new Text[2];
+    public Text[] DeathCountText = new Text[2];
+
+
 
     public Text phase2Text;
 
@@ -24,18 +33,30 @@ public class TextController : MonoBehaviour
         
     //}
 
-    public void TextUpdate(int id, int[] hp, int[] power, int[] magic)
+    public void TextUpdate(int id, int[] hp, int[] mp, int[] attack, int[] defence, int[] speed, int[] deathcount)
     {
         if (id == 1)
         {
 
+
             HPText[0].text = hp[0].ToString();
-            PWText[0].text = power[0].ToString();
-            MGText[0].text = magic[0].ToString();
+            MPText[0].text = mp[0].ToString();
+            AttackText[0].text = attack[0].ToString();
+            DefenceText[0].text = defence[0].ToString();
+            SpeedText[0].text = speed[0].ToString();
+            DeathCountText[0].text = deathcount[0].ToString();
+
+
+            //Debug.Log("aaa");
 
             HPText[1].text = hp[1].ToString();
-            PWText[1].text = power[1].ToString();
-            MGText[1].text = magic[1].ToString();
+            MPText[1].text = mp[1].ToString();
+            AttackText[1].text = attack[1].ToString();
+            DefenceText[1].text = defence[1].ToString();
+            SpeedText[1].text = speed[1].ToString();
+            DeathCountText[1].text = deathcount[1].ToString();
+
+
 
 
         }
@@ -43,12 +64,20 @@ public class TextController : MonoBehaviour
         if (id == 2)
         {
             HPText[0].text = hp[1].ToString();
-            PWText[0].text = power[1].ToString();
-            MGText[0].text = magic[1].ToString();
+            MPText[0].text = mp[1].ToString();
+            AttackText[0].text = attack[1].ToString();
+            DefenceText[0].text = defence[1].ToString();
+            SpeedText[0].text = speed[1].ToString();
+            DeathCountText[0].text = deathcount[1].ToString();
+
 
             HPText[1].text = hp[0].ToString();
-            PWText[1].text = power[0].ToString();
-            MGText[1].text = magic[0].ToString();
+            MPText[1].text = mp[0].ToString();
+            AttackText[1].text = attack[0].ToString();
+            DefenceText[1].text = defence[0].ToString();
+            SpeedText[1].text = speed[0].ToString();
+            DeathCountText[1].text = deathcount[0].ToString();
+
         }
 
 

@@ -44,9 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f240abb9e1949feac2755b3bb365af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: f4010000f4010000
+  hp: e8030000e8030000
   power: 6400000064000000
   magic: 6400000064000000
+  defence: 6400000064000000
+  speed: 6400000064000000
+  guardcost: 5
   id: 0
 --- !u!114 &4208703740334158929
 MonoBehaviour:
