@@ -591,8 +591,8 @@ public class GameController : MonoBehaviourPunCallbacks, IPunObservable
                 DecisionButton.SetActive(false);
             }
         }
-
         //防御側
+
         else
         {
             if (!select1[id - 1])
